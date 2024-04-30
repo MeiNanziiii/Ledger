@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(LecternScreenHandler.class)
-public class LecternScreenHandlerMixin {
+public abstract class LecternScreenHandlerMixin {
     @Inject(method = "onButtonClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Inventory;markDirty()V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     public void logPickBook(PlayerEntity player, int id, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;

@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AbstractSignBlock.class)
-public class AbstractSignBlockMixin {
+public abstract class AbstractSignBlockMixin {
 
     /**
      * Wraps the operation of item-based interactions with signs like waxing, dyeing, and using glow ink, with a

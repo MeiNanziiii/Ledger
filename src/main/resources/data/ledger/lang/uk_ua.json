@@ -51,7 +51,6 @@
     "text.ledger.action.block-change": "змінив",
     "text.ledger.action.item-insert": "додав",
     "text.ledger.action.item-remove": "видалив",
-    "text.ledger.action.block-item-drop": "скинув",
     "text.ledger.action.item-pick-up": "підібрав",
     "text.ledger.action.item-drop": "скинув",
     "text.ledger.action.entity-kill": "вбив",
