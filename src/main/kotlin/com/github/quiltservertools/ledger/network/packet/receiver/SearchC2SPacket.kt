@@ -10,7 +10,6 @@ import com.github.quiltservertools.ledger.network.packet.response.ResponseConten
 import com.github.quiltservertools.ledger.network.packet.response.ResponseS2CPacket
 import com.github.quiltservertools.ledger.utility.MessageUtils
 import com.github.quiltservertools.ledger.utility.launchMain
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.lucko.fabric.api.permissions.v0.Permissions
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -53,15 +52,21 @@ data class SearchC2SPacket(val restore: Boolean, val args: String) : CustomPaylo
                 sender
             )
 
-            Ledger.launch(Dispatchers.IO) {
+            Ledger.launch {
                 MessageUtils.warnBusy(source)
                 if (payload.restore) {
-                    val actions = DatabaseManager.restoreActions(params)
+                    val actions = DatabaseManager.selectRestore(params)
 
                     source.world.launchMain {
+                        val actionIds = HashSet<Int>()
+
                         for (action in actions) {
-                            action.restore(source.server)
-                            action.rolledBack = false
+                            if (action.restore(source.server)) {
+                                actionIds.add(action.id)
+                            }
+                        }
+                        Ledger.launch {
+                            DatabaseManager.restoreActions(actionIds)
                         }
 
                         ResponseS2CPacket.sendResponse(
@@ -73,14 +78,19 @@ data class SearchC2SPacket(val restore: Boolean, val args: String) : CustomPaylo
                         )
                     }
                 } else {
-                    val actions = DatabaseManager.rollbackActions(params)
+                    val actions = DatabaseManager.selectRollback(params)
 
                     source.world.launchMain {
-                        for (action in actions) {
-                            action.rollback(source.server)
-                            action.rolledBack = true
-                        }
+                        val actionIds = HashSet<Int>()
 
+                        for (action in actions) {
+                            if (action.rollback(source.server)) {
+                                actionIds.add(action.id)
+                            }
+                        }
+                        Ledger.launch {
+                            DatabaseManager.rollbackActions(actionIds)
+                        }
                         ResponseS2CPacket.sendResponse(
                             ResponseContent(
                                 LedgerPacketTypes.ROLLBACK.id,
